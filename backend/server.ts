@@ -7,6 +7,7 @@ import cors from 'cors';
 const app = express();
 app.use(cors())
 const server = http.createServer(app);
+// detta är websocket servern TÄNK ER TELEFONVÄXELN
 const io = new Server(server,{
   cors:{
     origin: "*"
@@ -15,11 +16,6 @@ const io = new Server(server,{
 
 // Serve static files (frontend)
 app.use(express.static('public'));
-
-// Socket.IO connection
-io.on('connection', (socket: Socket) => {
-  console.log('A user connected:', socket.id);
-
 // // SMARTASTE ROOMHANTERINGEN
 //   var query = socket.handshake.query;
 //   var roomName = query.roomName as string;
@@ -27,13 +23,31 @@ io.on('connection', (socket: Socket) => {
 
   // Lägg till socketio message placeBid (namn, belopp)
 
-  // Handle disconnection
+let highestBid = 0;
+let highestBidder = "";
+// Socket.IO connection
+io.on('connection', (socket: Socket) => {
+  console.log('A user connected:', socket.id);
+
+  socket.on('placeBid', (d) => {
+    console.log('placeBid:', d.name, d.bid);
+    if (d.bid > highestBid) {
+      highestBid = d.bid;
+      highestBidder = d.name;
+      io.emit('newBid', { name: highestBidder, bid: highestBid });
+    }else{
+      socket.emit('felsuperduper',"För lågt" );
+    }
+
+  });
+
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
   });
 });
 
 
+// när nån anropar localhost:3000/api/auctions så körs denna
 app.get('/api/auctions', (req, res) => {
   res.json(data.auctions);
 });
