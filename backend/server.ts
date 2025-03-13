@@ -3,6 +3,7 @@ import http from 'http';
 import { Server, Socket } from 'socket.io';
 import *  as data  from './data/database';
 import cors from 'cors';
+import { Auction } from './data/auction';
 
 const app = express();
 app.use(cors())
@@ -23,18 +24,24 @@ app.use(express.static('public'));
 
   // Lägg till socketio message placeBid (namn, belopp)
 
-let highestBid = 0;
-let highestBidder = "";
 // Socket.IO connection
 io.on('connection', (socket: Socket) => {
   console.log('A user connected:', socket.id);
+  var query = socket.handshake.query;
+  var roomName = query.roomName as string;
+  socket.join(roomName);
+
+  const auction = data.auctions.find((auction:Auction) => auction.id === roomName) as Auction;
+  socket.emit('newBid', { name: auction.highestBidder, bid: auction.highestBid });
 
   socket.on('placeBid', (d) => {
+    const auction = data.auctions.find((auction:Auction) => auction.id === roomName) as Auction;
+
     console.log('placeBid:', d.name, d.bid);
-    if (d.bid > highestBid) {
-      highestBid = d.bid;
-      highestBidder = d.name;
-      io.emit('newBid', { name: highestBidder, bid: highestBid });
+    if (d.bid > auction.highestBid && d.bid > auction.minprice){ 
+      auction.highestBid = d.bid;
+      auction.highestBidder = d.name;
+      io.to(roomName).emit('newBid', { name: auction.highestBidder, bid: auction.highestBid });
     }else{
       socket.emit('felsuperduper',"För lågt" );
     }
