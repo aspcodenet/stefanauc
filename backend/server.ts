@@ -43,7 +43,9 @@ io.on('connection', (socket: Socket) => {
     if (d.bid > auction.highestBid && d.bid > auction.minprice){ 
       auction.highestBid = d.bid;
       auction.highestBidder = d.name;
-      io.to(roomName).emit('newBid', { name: auction.highestBidder, bid: auction.highestBid });
+      io.to(roomName).emit('newBid', { 
+        minprice: auction.minprice,
+        name: auction.highestBidder, bid: auction.highestBid });
     }else{
       socket.emit('felsuperduper',"För lågt" );
     }
