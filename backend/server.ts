@@ -32,7 +32,9 @@ io.on('connection', (socket: Socket) => {
   socket.join(roomName);
 
   const auction = data.auctions.find((auction:Auction) => auction.id === roomName) as Auction;
-  socket.emit('newBid', { name: auction.highestBidder, bid: auction.highestBid });
+  socket.emit('newBid', { 
+    minprice: auction.minprice,
+    name: auction.highestBidder, bid: auction.highestBid });
 
   socket.on('placeBid', (d) => {
     const auction = data.auctions.find((auction:Auction) => auction.id === roomName) as Auction;

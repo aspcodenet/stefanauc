@@ -19,8 +19,10 @@ socket.on('newBid', (d) => {
   console.log('newBid:', d.name, d.bid);
   let highestBidder = document.getElementById("highestBidder") as HTMLSpanElement;
   let currentBid = document.getElementById("currentBid") as HTMLSpanElement;
+  let minprice = document.getElementById("minprice") as HTMLSpanElement;
   highestBidder.innerText = d.name;
   currentBid.innerText = d.bid;
+  minprice.innerText = d.minprice;
 });
 
 const btnPlacebid = document.getElementById("btnPlacebid") as HTMLButtonElement;
